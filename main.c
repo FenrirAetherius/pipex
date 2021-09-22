@@ -31,14 +31,13 @@ void child(char *cmd, char **envp)
 	i = -1;
 	while (path[++i])
 	{
-		perror(path[i]);
 		if (access(path[i], X_OK) >= 0)
 		{
 			execve(path[i], cmd_split, envp);
 			return;
 		}
 	}
-	return (perror("excecve error"));
+	return (perror("execve error"));
 }
 
 void    pipex(int f1, int f2, char *cmd1, char *cmd2, char **envp)
