@@ -6,11 +6,22 @@
 /*   By: mrozniec <mrozniec@student.le-101.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/12/03 18:02:37 by mrozniec          #+#    #+#             */
-/*   Updated: 2021/09/22 16:40:57 by mrozniec         ###   ########lyon.fr   */
+/*   Updated: 2021/10/06 17:46:29 by mrozniec         ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+
+static int	ft_skip(const char *s, int n)
+{
+	if (s[n] == '\"')
+	{
+		n++;
+		while (s[n] != '\"')
+			n++;
+	}
+	return (n);
+}
 
 static char	**ft_ttabcrea(char const *s, char c)
 {
@@ -26,6 +37,7 @@ static char	**ft_ttabcrea(char const *s, char c)
 			n++;
 		if (s[n] != c && s[n] != '\0')
 			line++;
+		n = ft_skip(s, n);
 		while (s[n] != c && s[n] != '\0')
 			n++;
 	}
@@ -41,12 +53,18 @@ static char	*ft_fillstr(char const *s, char c, int n)
 	int		p;
 	char	*strs;
 
-	m = 0;
+	m = n;
 	while (s[n] != '\0' && s[n] != c)
 	{
-		m++;
+		n = ft_skip(s, n);
 		n++;
 	}
+	if (s[n - 1] == '\"')
+	{
+		m++;
+		n--;
+	}
+	m = n - m;
 	strs = malloc(sizeof(char) * (m + 1));
 	if (!strs)
 		return (NULL);
@@ -91,9 +109,13 @@ char	**ft_split(char const *s, char c)
 			if (!strs[line - 1])
 				return (ft_free_error(strs, line - 1));
 		}
+		n = ft_skip(s, n);
 		while (s[n] != c && s[n] != '\0')
 			n++;
 	}
 	strs[line] = NULL;
+//	n = -1;
+//	while(strs[++n])
+//		perror(strs[n]);
 	return (strs);
 }

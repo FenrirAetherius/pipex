@@ -1,42 +1,72 @@
 #include "pipex.h"
 
-void child(char *cmd, char **envp)
+static char	**ft_fill_tab(char **tstr1, char **tstr2, char *str)
+{
+	int i;
+
+	i = -1;
+	while (tstr1[++i])
+	{
+		tstr2[i] = ft_strjoin(tstr1[i], str);
+		if (tstr2[i] == NULL)
+		{
+			ft_free_tab(tstr1);
+			ft_free_tab(tstr2);
+			return (NULL);
+		}
+	}
+	while(--i >= 0)
+		free(tstr1[i]);
+	return (tstr2);
+}
+
+static char	**ft_fill_path(char *cmd, char **path)
+{
+	char	**tmp_path;
+	int		i;
+
+	i = 0;
+	while(path[i])
+		i++;
+	tmp_path = malloc(sizeof(char *) * (i + 1));
+	if (!tmp_path)
+		return (NULL);
+	tmp_path = ft_fill_tab(path, tmp_path, "/");
+	if (tmp_path == NULL)
+		return (NULL);
+	path = ft_fill_tab(tmp_path, path, cmd);
+	if (path == NULL)
+		return (NULL);
+	free(tmp_path);
+	return (path);
+}
+
+static void	child(char *cmd, char **envp)
 {
 	char **cmd_split;
-	char **tmp_path;
 	char **path;
 	int i;
 
 	cmd_split = ft_split(cmd, ' ');
-	path = ft_split(envp[4] + 5, ':');
-	i = 0;
-	while (path[i])
-		i++;
-	tmp_path = malloc(sizeof(char *) * (i + 1));
-	if (!tmp_path)
-		return (perror("malloc"));
-	while (--i >= 0)
-	{
-		tmp_path[i] = ft_strjoin(path[i], "/");
-		free(path[i]);
-	}
-	while (tmp_path[++i])
-	{
-		path[i] = ft_strjoin(tmp_path[i], cmd_split[0]);
-		free(tmp_path[i]);
-	}
-	free(tmp_path);
+	path = ft_init_child(envp); //mac envp[4] linux envp[14]
 	if (cmd_split == NULL || path == NULL)
-		return (perror("malloc split"));
+		return (perror("malloc"));
+	path = ft_fill_path(cmd_split[0], path);
+	if (path == NULL)
+		return(perror("malloc"));
 	i = -1;
 	while (path[++i])
 	{
 		if (access(path[i], X_OK) >= 0)
 		{
-			execve(path[i], cmd_split, envp);
+			if (execve(path[i], cmd_split, envp) < 0)
+				perror("Fail to execve");
 			return;
 		}
 	}
+	if (access(cmd_split[0], X_OK) >= 0)
+		if (execve(cmd_split[0], cmd_split, envp) < 0)
+			perror("Fail to execve");
 	return (perror("execve error"));
 }
 
@@ -89,7 +119,12 @@ int main(int argc, char **argv, char **envp)
 		f2 = open(argv[4], O_CREAT | O_RDWR | O_TRUNC, 0644);
 		if (f1 < 0 || f2 < 0)
 			return (-1);
-		pipex(f1, f2, argv[2], argv[3], envp);
+		if (argv[2][0] == '\0' && argv[3][0] != '\0')
+			pipex(f1, f2, argv[3], argv[3], envp);
+		else if (argv[3][0] == '\0' && argv[2][0] != '\0')
+			pipex(f1, f2, argv[2], argv[2], envp);
+		else
+			pipex(f1, f2, argv[2], argv[3], envp);
 		close(f1);
 		close(f2);
 		return (0);
