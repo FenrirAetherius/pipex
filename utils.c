@@ -24,5 +24,46 @@ char	**ft_init_child(char **envp)
 		i++;
 	if (!envp[i])
 		return (NULL);
-	return (ft_split(envp[i] + 5, ':')); //mac envp[4] linux envp[14]
+	return (ft_split(envp[i] + 5, ':'));
+}
+
+void	ft_init_child2(int *f, int par, int pipend[2])
+{
+	if (par == 0)
+	{
+		dup2(*f, 0);
+		dup2(pipend[1], 1);
+		close(pipend[0]);
+	}
+	else
+	{
+		dup2(*f, 1);
+		dup2(pipend[0], 0);
+		close(pipend[1]);
+	}
+}
+
+void	ft_wait_end(int pipend[2], pid_t child_p[2], int *status)
+{
+	close(pipend[0]);
+	close(pipend[1]);
+	waitpid(child_p[0], status, 0);
+	waitpid(child_p[1], status, 0);
+}
+
+int	ft_init_pipex(int *status, int pipend[2], pid_t child_p[2])
+{
+	*status = 0;
+	if (pipe(pipend) == -1)
+	{
+		perror("pipe error");
+		return (-1);
+	}
+	child_p[0] = fork();
+	if (child_p[0] < 0)
+	{
+		perror("fork error");
+		return (-1);
+	}
+	return (0);
 }

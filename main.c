@@ -48,7 +48,7 @@ static void	child(char *cmd, char **envp)
 	int i;
 
 	cmd_split = ft_split(cmd, ' ');
-	path = ft_init_child(envp); //mac envp[4] linux envp[14]
+	path = ft_init_child(envp);
 	if (cmd_split == NULL || path == NULL)
 		return (perror("malloc"));
 	path = ft_fill_path(cmd_split[0], path);
@@ -74,38 +74,27 @@ void    pipex(int f1, int f2, char *cmd1, char *cmd2, char **envp)
 {
 	int		pipend[2];
 	int		status;
-	pid_t	child1;
-	pid_t	child2;
+	pid_t	child_p[2];
 
-	if (pipe(pipend) == -1)
-		perror("pipe error");
-	child1 = fork();
-	if (child1 < 0)
-		return (perror("fork error"));
-	if (child1 == 0)
+	if (ft_init_pipex(&status, pipend, child_p) == -1)
+		return ;
+	if (child_p[0] == 0)
 	{
-		dup2(f1, 0);
-		dup2(pipend[1], 1);
-		close(pipend[0]);
+		ft_init_child2(&f1, 0, pipend);
 		child(cmd1, envp);
 	}
 	else
 	{
-		child2 = fork();
-		if (child2 < 0)
+		child_p[1] = fork();
+		if (child_p[1] < 0)
 			return (perror("fork error"));
-		if (child2 == 0)
+		if (child_p[1] == 0)
 		{
-			dup2(f2, 1);
-			dup2(pipend[0], 0);
-			close(pipend[1]);
+			ft_init_child2(&f2, 1, pipend);
 			child(cmd2, envp);
 		}
 	}
-	close(pipend[0]);
-	close(pipend[1]);
-	waitpid(child1, &status, 0);
-	waitpid(child2, &status, 0);
+	ft_wait_end(pipend, child_p, &status);
 }
 
 int main(int argc, char **argv, char **envp)
