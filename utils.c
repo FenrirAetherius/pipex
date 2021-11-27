@@ -1,12 +1,20 @@
-//
-// Created by Maximilien Rozniecki on 9/22/21.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mrozniec <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/11/27 14:16:10 by mrozniec          #+#    #+#             */
+/*   Updated: 2021/11/27 14:16:39 by mrozniec         ###   ########lyon.fr   */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "pipex.h"
 
 void	ft_free_tab(char **tab)
 {
-	int i;
+	int	i;
 
 	i = -1;
 	while (tab[++i])
@@ -16,10 +24,10 @@ void	ft_free_tab(char **tab)
 
 char	**ft_init_child(char **envp)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	while (envp[i] && (envp[i][0] != 'P' || envp[i][1] != 'A' ||\
+	while (envp[i] && (envp[i][0] != 'P' || envp[i][1] != 'A' || \
 	envp[i][2] != 'T' || envp[i][3] != 'H' || envp[i][4] != '='))
 		i++;
 	if (!envp[i])

@@ -49,32 +49,30 @@ static char	**ft_ttabcrea(char const *s, char c)
 
 static char	*ft_fillstr(char const *s, char c, int n)
 {
-	int		m;
-	int		p;
+	int		m[2];
 	char	*strs;
 
-	m = n;
+	m[0] = n;
 	while (s[n] != '\0' && s[n] != c)
 	{
 		n = ft_skip(s, n);
 		n++;
 	}
 	if (s[n - 1] == '\"')
-	{
-		m++;
+		m[0]++;
+	if (s[n - 1] == '\"')
 		n--;
-	}
-	m = n - m;
-	strs = malloc(sizeof(char) * (m + 1));
+	m[0] = n - m[0];
+	strs = malloc(sizeof(char) * (m[0] + 1));
 	if (!strs)
 		return (NULL);
-	p = m;
-	while (m > 0)
+	m[1] = m[0];
+	while (m[0] > 0)
 	{
-		strs[p - m] = s[n - m];
-		m--;
+		strs[m[1] - m[0]] = s[n - m[0]];
+		m[0]--;
 	}
-	strs[p] = '\0';
+	strs[m[1]] = '\0';
 	return (strs);
 }
 
@@ -114,8 +112,5 @@ char	**ft_split(char const *s, char c)
 			n++;
 	}
 	strs[line] = NULL;
-//	n = -1;
-//	while(strs[++n])
-//		perror(strs[n]);
 	return (strs);
 }
